@@ -1,0 +1,78 @@
+pages:
+  - name: Home
+    width: wide
+    refresh-interval: 300
+    refresh-type: soft
+
+    head-widgets:
+      - type: markets
+        hide-header: true
+        markets:
+          - symbol: CRWV
+            name: CoreWeave
+          - symbol: NVDA
+            name: NVIDIA
+          - symbol: AAPL
+            name: Apple
+          - symbol: MSFT
+            name: Microsoft
+          - symbol: BTC-USD
+            name: Bitcoin
+
+    columns:
+      # LEFT COLUMN — Clock, Weather, Calendar
+      - size: small
+        widgets:
+          - type: clock
+            hour-format: 12h
+            timezones:
+              - timezone: Asia/Kolkata
+                label: Bangalore
+
+          - type: weather
+            location: Bangalore, India
+            units: metric
+            hour-format: 12h
+
+          - type: calendar
+            first-day-of-week: monday
+
+      # CENTER COLUMN — Hacker News + r/technology
+      - size: full
+        widgets:
+          - type: hacker-news
+            limit: 5
+            collapse-after: -1
+
+          - type: reddit
+            subreddit: technology
+            show-thumbnails: true
+            limit: 5
+            collapse-after: -1
+
+      # RIGHT COLUMN — r/worldnews + Indian RSS
+      - size: full
+        widgets:
+          - type: reddit
+            subreddit: worldnews
+            show-thumbnails: true
+            limit: 5
+            collapse-after: -1
+
+          - type: rss
+            title: Indian News
+            style: detailed-list
+            limit: 10
+            collapse-after: -1
+            cache: 1h
+            feeds:
+              - url: https://www.thehindu.com/feeder/default.rss
+                title: The Hindu
+              - url: https://feeds.feedburner.com/ndtvnews-top-stories
+                title: NDTV
+              - url: https://indianexpress.com/feed/
+                title: Indian Express
+              - url: https://www.livemint.com/rss/news
+                title: LiveMint
+              - url: https://timesofindia.indiatimes.com/rssfeedstopstories.cms
+                title: Times of India

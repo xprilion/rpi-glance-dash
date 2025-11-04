@@ -7,6 +7,7 @@ pages:
     head-widgets:
       - type: markets
         hide-header: true
+        cache: 1m
         markets:
           - symbol: CRWV
             name: CoreWeave
@@ -20,59 +21,135 @@ pages:
             name: Bitcoin
 
     columns:
-      # LEFT COLUMN — Clock, Weather, Calendar
+      # COLUMN 1 — Clock with multiple timezones + Refresh countdown + Weather
       - size: small
         widgets:
           - type: clock
-            hour-format: 12h
+            hour-format: 24h
             timezones:
               - timezone: Asia/Kolkata
                 label: Bangalore
+              - timezone: Europe/London
+                label: London
+              - timezone: America/New_York
+                label: New York
+              - timezone: America/Los_Angeles
+                label: California
+
+          - type: html
+            source: |
+              <div style="padding: 10px 0;">
+                <div class="size-h6 color-subdue" style="margin-bottom: 5px;">Next Refresh</div>
+                <div class="size-h3 color-primary" id="refresh-countdown-glance" data-start-time="">5:00</div>
+              </div>
+              <script>
+                (function() {
+                  const COUNTDOWN_ID = 'refresh-countdown-glance';
+                  const REFRESH_INTERVAL = 300; // 5 minutes in seconds
+                  
+                  function findAndInit() {
+                    const el = document.getElementById(COUNTDOWN_ID);
+                    if (!el) {
+                      setTimeout(findAndInit, 100);
+                      return;
+                    }
+                    
+                    // Initialize start time if not set
+                    if (!el.dataset.startTime) {
+                      el.dataset.startTime = Date.now().toString();
+                    }
+                    
+                    function updateCountdown() {
+                      const el = document.getElementById(COUNTDOWN_ID);
+                      if (!el) return;
+                      
+                      const startTime = parseInt(el.dataset.startTime) || Date.now();
+                      const now = Date.now();
+                      const elapsed = Math.floor((now - startTime) / 1000);
+                      const remaining = REFRESH_INTERVAL - (elapsed % REFRESH_INTERVAL);
+                      
+                      const mins = Math.floor(remaining / 60);
+                      const secs = remaining % 60;
+                      el.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+                    }
+                    
+                    updateCountdown();
+                    setInterval(updateCountdown, 1000);
+                  }
+                  
+                  // Try multiple methods to ensure script runs
+                  if (document.readyState === 'complete') {
+                    findAndInit();
+                  } else if (document.readyState === 'interactive') {
+                    setTimeout(findAndInit, 100);
+                  } else {
+                    document.addEventListener('DOMContentLoaded', findAndInit);
+                    window.addEventListener('load', findAndInit);
+                  }
+                  
+                  // Also try immediately
+                  setTimeout(findAndInit, 50);
+                })();
+              </script>
 
           - type: weather
             location: Bangalore, India
             units: metric
-            hour-format: 12h
+            hour-format: 24h
 
           - type: calendar
             first-day-of-week: monday
 
-      # CENTER COLUMN — Hacker News + r/technology
+      # COLUMN 2 — Split into 2 sub-columns (Hacker News + Indian News)
       - size: full
         widgets:
-          - type: hacker-news
-            limit: 5
-            collapse-after: -1
+          - type: split-column
+            widgets:
+              - type: hacker-news
+                title: Hacker News
+                limit: 5
+                collapse-after: -1
+                cache: 2m
 
-          - type: reddit
-            subreddit: technology
-            show-thumbnails: true
-            limit: 5
-            collapse-after: -1
+              - type: rss
+                title: Indian News
+                style: detailed-list
+                limit: 3
+                collapse-after: -1
+                cache: 5m
+                feeds:
+                  - url: https://www.thehindu.com/feeder/default.rss
+                    title: The Hindu
+                  - url: https://feeds.feedburner.com/ndtvnews-top-stories
+                    title: NDTV
+                  - url: https://indianexpress.com/feed/
+                    title: Indian Express
+                  - url: https://www.livemint.com/rss/news
+                    title: LiveMint
+                  - url: https://timesofindia.indiatimes.com/rssfeedstopstories.cms
+                    title: Times of India
 
-      # RIGHT COLUMN — r/worldnews + Indian RSS
+          - $include: nearby-aircraft.yaml
+
+      # COLUMN 3 — Split into 2 sub-columns (Reddit Technology + Reddit World News)
       - size: full
         widgets:
-          - type: reddit
-            subreddit: worldnews
-            show-thumbnails: true
-            limit: 5
-            collapse-after: -1
+          - type: split-column
+            widgets:
+              - type: reddit
+                title: r/technology
+                subreddit: technology
+                show-thumbnails: true
+                limit: 5
+                collapse-after: -1
+                cache: 2m
 
-          - type: rss
-            title: Indian News
-            style: detailed-list
-            limit: 10
-            collapse-after: -1
-            cache: 1h
-            feeds:
-              - url: https://www.thehindu.com/feeder/default.rss
-                title: The Hindu
-              - url: https://feeds.feedburner.com/ndtvnews-top-stories
-                title: NDTV
-              - url: https://indianexpress.com/feed/
-                title: Indian Express
-              - url: https://www.livemint.com/rss/news
-                title: LiveMint
-              - url: https://timesofindia.indiatimes.com/rssfeedstopstories.cms
-                title: Times of India
+              - type: reddit
+                title: r/worldnews
+                subreddit: worldnews
+                show-thumbnails: true
+                limit: 5
+                collapse-after: -1
+                cache: 2m
+
+          - $include: random-fact.yaml

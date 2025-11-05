@@ -1,6 +1,7 @@
 - type: custom-api # https://github.com/glanceapp/community-widgets/blob/main/widgets/random-fact/README.md
+  hide-header: true
   title: Random Fact
-  cache: 3h
+  cache: 30m
   url: https://uselessfacts.jsph.pl/api/v2/facts/random
   template: |
     <p class="size-h4 color-paragraph">{{ .JSON.String "text" }}</p>

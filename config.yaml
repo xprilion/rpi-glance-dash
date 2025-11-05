@@ -1,8 +1,12 @@
+document:
+  hide-footer: true
+  head: |
+    <meta http-equiv="refresh" content="600">
+
 pages:
   - name: Home
     width: wide
-    refresh-interval: 300
-    refresh-type: soft
+    hide-desktop-navigation: true
 
     head-widgets:
       - type: markets
@@ -25,10 +29,9 @@ pages:
       - size: small
         widgets:
           - type: clock
+            hide-header: true
             hour-format: 24h
             timezones:
-              - timezone: Asia/Kolkata
-                label: Bangalore
               - timezone: Europe/London
                 label: London
               - timezone: America/New_York
@@ -36,120 +39,86 @@ pages:
               - timezone: America/Los_Angeles
                 label: California
 
-          - type: html
-            source: |
-              <div style="padding: 10px 0;">
-                <div class="size-h6 color-subdue" style="margin-bottom: 5px;">Next Refresh</div>
-                <div class="size-h3 color-primary" id="refresh-countdown-glance" data-start-time="">5:00</div>
-              </div>
-              <script>
-                (function() {
-                  const COUNTDOWN_ID = 'refresh-countdown-glance';
-                  const REFRESH_INTERVAL = 300; // 5 minutes in seconds
-                  
-                  function findAndInit() {
-                    const el = document.getElementById(COUNTDOWN_ID);
-                    if (!el) {
-                      setTimeout(findAndInit, 100);
-                      return;
-                    }
-                    
-                    // Initialize start time if not set
-                    if (!el.dataset.startTime) {
-                      el.dataset.startTime = Date.now().toString();
-                    }
-                    
-                    function updateCountdown() {
-                      const el = document.getElementById(COUNTDOWN_ID);
-                      if (!el) return;
-                      
-                      const startTime = parseInt(el.dataset.startTime) || Date.now();
-                      const now = Date.now();
-                      const elapsed = Math.floor((now - startTime) / 1000);
-                      const remaining = REFRESH_INTERVAL - (elapsed % REFRESH_INTERVAL);
-                      
-                      const mins = Math.floor(remaining / 60);
-                      const secs = remaining % 60;
-                      el.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
-                    }
-                    
-                    updateCountdown();
-                    setInterval(updateCountdown, 1000);
-                  }
-                  
-                  // Try multiple methods to ensure script runs
-                  if (document.readyState === 'complete') {
-                    findAndInit();
-                  } else if (document.readyState === 'interactive') {
-                    setTimeout(findAndInit, 100);
-                  } else {
-                    document.addEventListener('DOMContentLoaded', findAndInit);
-                    window.addEventListener('load', findAndInit);
-                  }
-                  
-                  // Also try immediately
-                  setTimeout(findAndInit, 50);
-                })();
-              </script>
-
           - type: weather
+            hide-header: true
             location: Bangalore, India
             units: metric
             hour-format: 24h
 
           - type: calendar
+            hide-header: true
             first-day-of-week: monday
+
+          - type: server-stats
+            hide-header: true
+            servers:
+              - type: local
+                name: Services
 
       # COLUMN 2 — Split into 2 sub-columns (Hacker News + Indian News)
       - size: full
         widgets:
+          - type: rss
+            title: Indian News
+            style: vertical-list
+            limit: 5
+            collapse-after: -1
+            cache: 5m
+            feeds:
+              - url: https://www.thehindu.com/feeder/default.rss
+                title: The Hindu
+              - url: https://feeds.feedburner.com/ndtvnews-top-stories
+                title: NDTV
+              - url: https://timesofindia.indiatimes.com/rssfeedstopstories.cms
+                title: Times of India
           - type: split-column
             widgets:
               - type: hacker-news
                 title: Hacker News
-                limit: 5
+                limit: 7
                 collapse-after: -1
                 cache: 2m
 
               - type: rss
-                title: Indian News
-                style: detailed-list
-                limit: 3
+                title: Tech News
+                style: vertical-list
+                limit: 5
                 collapse-after: -1
                 cache: 5m
                 feeds:
-                  - url: https://www.thehindu.com/feeder/default.rss
-                    title: The Hindu
-                  - url: https://feeds.feedburner.com/ndtvnews-top-stories
-                    title: NDTV
-                  - url: https://indianexpress.com/feed/
-                    title: Indian Express
-                  - url: https://www.livemint.com/rss/news
-                    title: LiveMint
-                  - url: https://timesofindia.indiatimes.com/rssfeedstopstories.cms
-                    title: Times of India
-
-          - $include: nearby-aircraft.yaml
+                  - url: https://www.theverge.com/rss/index.xml
+                    title: The Verge
+                  - url: https://feeds.arstechnica.com/arstechnica/index/
+                    title: Ars Technica
+                  - url: https://techcrunch.com/feed/
+                    title: TechCrunch
+                  - url: https://www.wired.com/feed/rss
+                    title: WIRED
 
       # COLUMN 3 — Split into 2 sub-columns (Reddit Technology + Reddit World News)
       - size: full
         widgets:
           - type: split-column
             widgets:
-              - type: reddit
-                title: r/technology
-                subreddit: technology
-                show-thumbnails: true
-                limit: 5
-                collapse-after: -1
-                cache: 2m
+              - type: split-column
+                widgets:
+                  - $include: weather-seven-day.yaml
+                  - type: rss
+                    title: World News
+                    style: vertical-list
+                    limit: 7
+                    collapse-after: -1
+                    cache: 5m
+                    feeds:
+                      - url: http://feeds.bbci.co.uk/news/world/rss.xml
+                        title: BBC World
+                      - url: https://www.aljazeera.com/xml/rss/all.xml
+                        title: Al Jazeera
+                      - url: https://www.theguardian.com/world/rss
+                        title: The Guardian (World)
 
-              - type: reddit
-                title: r/worldnews
-                subreddit: worldnews
-                show-thumbnails: true
-                limit: 5
-                collapse-after: -1
-                cache: 2m
-
-          - $include: random-fact.yaml
+              - type: split-column
+                widgets:
+                  - $include: countdown.yaml
+                  - $include: random-fact.yaml
+                  - $include: nearby-aircraft.yaml
